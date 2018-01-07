@@ -21,7 +21,7 @@ def cli_extract_from_file(filename, parser_type):
     """Extracts forensic artifacts from given file, with right type of parser
         specified, with click user interface"""
     artifacts = extract_from_file(filename, parser_type)
-    pprint(artifacts.export())
+    pprint(artifacts)
 
 
 if __name__ == '__main__':

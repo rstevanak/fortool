@@ -1,3 +1,3 @@
 def parse(filename):
-    """Parses logs of whole system, given configuration of rsyslog"""
+    """Parses logs of whole system, given configuration file of logrotate"""
     raise NotImplementedError
