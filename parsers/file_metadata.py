@@ -28,5 +28,5 @@ def parse(filename, recursive=True):
         artifacts[absolute_file] = get_artifact(absolute_file)
         if os.path.isdir(absolute_file) and recursive:
             artifacts.update(parse(absolute_file, True))
-            # TODO: solve infinite loop
+            # TODO: solve symlinks
     return artifacts
