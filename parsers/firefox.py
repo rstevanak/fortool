@@ -13,13 +13,14 @@ def parse_profile(filename):
     profile_arts = {}
 
     # Parsing browser history
-    profile_arts["history"] = []  # TODO: is this right structure?
+    profile_arts["history"] = []
     database = sqlite3.connect(os.path.join(moz_home, "places.sqlite"))
-    query = "SELECT moz_historyvisits.visit_date, moz_places.url " \
+    query = "SELECT moz_historyvisits.visit_date, moz_places.url, " \
+            "moz_places.title " \
             "FROM moz_places, moz_historyvisits " \
             "WHERE moz_places.id = moz_historyvisits.place_id;"
     for row in database.execute(query):
-        art = {"time": row[0] // 1000000, "site": row[1]}
+        art = {"time": row[0] // 1000000, "site": row[1], "title": row[2]}
         profile_arts["history"].append(art)
 
     # Parsing browser download history
