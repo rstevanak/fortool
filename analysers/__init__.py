@@ -1,2 +1,2 @@
 __all__ = ['print']
-from parsers import *
+from analysers import *

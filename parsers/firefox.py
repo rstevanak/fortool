@@ -61,17 +61,19 @@ def parse_profile(filename):
 
     # Parsing passwords
     profile_arts["passwords"] = []
-    passwords = json.load(open(os.path.join(moz_home, "logins.json")))
-    for row in passwords['logins']:
-        art = {}
-        art["time_last"] = row['timeLastUsed'] // 1000
-        art["site"] = row['hostname']
-        art["time_created"] = row['timeCreated']
-        art["time_changed"] = row['timePasswordChanged']
-        art["encrypted_username"] = row['encryptedUsername']
-        art["encrypted_password"] = row['encryptedPassword']
-        profile_arts["passwords"].append(art)
-        # TODO: decrypt passwords
+    passwords_path = os.path.join(moz_home, "logins.json")
+    if os.path.exists(passwords_path):
+        passwords = json.load(open(passwords_path))
+        for row in passwords['logins']:
+            art = {}
+            art["time_last"] = row['timeLastUsed'] // 1000
+            art["site"] = row['hostname']
+            art["time_created"] = row['timeCreated']
+            art["time_changed"] = row['timePasswordChanged']
+            art["encrypted_username"] = row['encryptedUsername']
+            art["encrypted_password"] = row['encryptedPassword']
+            profile_arts["passwords"].append(art)
+            # TODO: decrypt passwords
 
     database = sqlite3.connect(os.path.join(moz_home, "cookies.sqlite"))
     query = 'SELECT creationTime, baseDomain, value, name FROM moz_cookies;'
