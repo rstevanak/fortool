@@ -5,8 +5,7 @@ from os import listdir
 
 def parse(filename):
     """Parses etc/crontab ,its cron.d and also hourly, daily and monthly"""
-    artifacts = {"jobs":[]}
-    artifacts["jobs"] = parse_crontab(filename)
+    artifacts = {"jobs": parse_crontab(filename)}
 
     # parsing every file from ./cron.d/ as crontab
     crond_dir = abspath(join(dirname(filename), "cron.d"))

@@ -10,9 +10,9 @@ def parse_wtmp(filename):
     # TODO: parse from file, not through last
     # calling last with parameters to maximise extracted information
     raw_output = subprocess.check_output(['last', '--time-format', 'iso',
-                                      '-xiw', '-f', filename])
+                                          '-xiw', '-f', filename])
     decoded = raw_output.decode("utf-8")
-    artifacts = {'meta': {'begin_date': 1}, 'data': []}
+    artifacts = {'meta': {}, 'data': []}
     # constructing regex to match and group only lines in format:
     # (username) (tty\number) (ip_address) (all other characters till endline)
     iso_datetime_regex = r"(\d{4}-\d{2}-\d{2}T\d{2}\:\d{2}\:\d{2}[+-]\d{4})"
@@ -28,4 +28,5 @@ def parse_wtmp(filename):
         # TODO: parse time into epoch
         artifacts['data'].append(login_art)
     # TODO: parse restarts and runlevel changes
+    # TODO: parse begin_date from file
     return artifacts

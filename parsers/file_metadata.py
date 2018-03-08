@@ -1,16 +1,17 @@
 import os
 
 
-def get_artifact(filename):
-    """Returns mac times of file"""
-    file_desc = os.stat(filename)
+def get_metadata(filename):
+    """Returns metadata of file specified"""
+    file_desc = os.stat(filename, follow_symlinks=False)
     art = {}
     art["atime"] = file_desc.st_atime
     art["mtime"] = file_desc.st_mtime
-    art["scime"] = file_desc.st_ctime
-    # TODO: not to resolve symlinks
+    art["ctime"] = file_desc.st_ctime
+    art["permissions"] = file_desc.st_mode
+    art["uid"] = file_desc.st_uid
+    art["gid"] = file_desc.st_gid
     # TODO: change desc depending on file type
-    # TODO: users
     # TODO: creation time
     # TODO: maybe calculate hash of file?
     return art
@@ -25,8 +26,7 @@ def parse(filename, recursive=True):
         return artifacts
     for file in os.listdir(folder):
         absolute_file = os.path.join(folder, file)
-        artifacts[absolute_file] = get_artifact(absolute_file)
+        artifacts[absolute_file] = get_metadata(absolute_file)
         if os.path.isdir(absolute_file) and recursive:
             artifacts.update(parse(absolute_file, True))
-            # TODO: solve symlinks
     return artifacts
