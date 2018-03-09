@@ -5,6 +5,8 @@ def parse(filename):
     """"Parses usernames, their homes and shells, given
     /etc and also its password hash and expiratory
     information"""
+    # TODO: somehow refactor, so user can specify location of shadow
+    # and passwd explicitly
     # TODO: sudoers, groups
     artifacts = {}
 

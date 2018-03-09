@@ -22,11 +22,12 @@ def extract_from_file(filename, parser_type):
                      ', '.join(parsers.__all__))
 @click.option('--output', '-o', type=click.Path(file_okay=True, dir_okay=False,
                                                 writable=True),
-              help='File, to which resulting json is written, if not, default'
-                   'is standard output')
+              help='File, with which resulting json merged, if not stated, '
+                   'default is standard output')
 def cli_extract_from_file(filename, parser_type, output):
     """Extracts forensic artifacts from given file, with right type of parser
         specified, with click user interface"""
+    # click interface should ensure the parser is valid
     artifacts = extract_from_file(filename, parser_type)
     if output:
         with open(output, 'w') as outfile:
