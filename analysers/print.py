@@ -1,9 +1,5 @@
-import json
-from pprint import pprint
+from pprint import pformat
 
 
-def analyse(filename):
-    with open(filename, 'r') as file:
-        json_data = json.load(file)
-
-    pprint(json_data)
+def analyse(parsed):
+    return pformat(parsed).split('\n')

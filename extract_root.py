@@ -1,3 +1,4 @@
+import json
 from pprint import pprint
 
 import click
@@ -8,13 +9,6 @@ import sys
 from extract_file import extract_from_file
 
 
-@click.command()
-@click.argument('root', type=click.Path(exists=True, file_okay=False,
-                                        dir_okay=True, readable=True))
-@click.option('--configuration', '-c',
-              type=click.Path(exists=True, file_okay=True, dir_okay=False,
-                              readable=True),
-              help="filename of configuration to be used")
 def extract_from_root(root, configuration):
     """Extracts forensic artifacts from filesystem, given its root and
     configuration file"""
@@ -44,7 +38,6 @@ def extract_from_root(root, configuration):
                 continue
 
             for user in artifacts['user_data'].values():
-                print(user)
                 home_dir = user['home'].strip('/')
                 # TODO more robust home_dir sanitation for os.path.join
                 # path join works if one address does not begin with /
@@ -93,7 +86,38 @@ def extract_from_root(root, configuration):
                 current_dict[art_path[-1]].append(art)
     return artifacts
 
+@click.command()
+@click.argument('root', type=click.Path(exists=True, file_okay=False,
+                                        dir_okay=True, readable=True))
+@click.option('--configuration', '-c',
+              type=click.Path(exists=True, file_okay=True, dir_okay=False,
+                              readable=True),
+              help="filename of configuration to be used")
+@click.option('--output', '-o', type=click.Path(file_okay=True, dir_okay=False,
+                                                writable=True),
+              help='File, with which resulting json merged, if not stated, '
+                   'default is standard output')
+def cli_extract_from_root(root, configuration, output):
+    artifacts = extract_from_root(root,configuration)
+    if output:
+        with open(output, 'w') as outfile:
+            json.dump(artifacts, outfile)
+    else:
+        #rec_type_print(artifacts, 0)
+        print(json.dumps(artifacts))
+
+
+def rec_type_print(obj, form):
+    print(form * '     ' + str(type(obj)))
+    if type(obj) == dict:
+        for i in obj:
+            print(i,end=':\n')
+            rec_type_print(obj.get(i), form+1)
+    elif type(obj) == list:
+        for i in range(len(obj)):
+            print(i, end=":\n")
+            rec_type_print(obj[i], form+1)
 
 if __name__ == '__main__':
-    artifacts = extract_from_root()
-    pprint(artifacts)
+    cli_extract_from_root()
+

@@ -1,3 +1,4 @@
+import base64
 import os
 import sqlite3
 
@@ -42,7 +43,11 @@ def parse_profile(filename):
     for row in database.execute(query):
         art = {}
         art["time_created"] = row[0] // 10000000
-        art["site"], art["encrypted_value"] = row[1:]
+        # This is done in order to be accepted by json
+        # json doesn't like bytes
+        b64encoded_cookie = base64.b64encode(row[2])
+        art["encrypted_value"] = b64encoded_cookie.decode('UTF-8')
+        art["site"] = row[1]
         profile_arts["cookies"].append(art)
         # TODO more details about cookies, decrypt values?
         # TODO what does secure in cookies mean
