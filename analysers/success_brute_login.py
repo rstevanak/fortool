@@ -25,18 +25,16 @@ def analyse(parsed, threshold=5, timeframe=600):
     # the same without code repeating
     for src_list, dst_dict in [(db_wtmp, all_succ), (db_btmp, all_unsucc)]:
         for entry in src_list['data']:
-            if not dst_dict.get(entry['username']):
-                dst_dict[entry['username']] = []
-            dst_dict[entry['username']].append(entry)
+            dst_dict.setdefault(entry['username'], []).append(entry)
 
     # intersection of usernames in both lists, because there is no use in
     # looking through logins in just one of them
-    users_all = set(all_succ.keys()) | set(all_unsucc.keys())
+    users_all = set(all_succ.keys()) & set(all_unsucc.keys())
 
     for username in users_all:
         # rename for clarity
         user_succ = all_succ[username]
-        user_unsucc = all_succ[username]
+        user_unsucc = all_unsucc[username]
         output += find_brute(user_succ, user_unsucc, threshold, timeframe)
     return output
 
