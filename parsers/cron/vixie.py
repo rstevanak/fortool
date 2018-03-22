@@ -1,4 +1,4 @@
-from os.path import abspath, join, isdir, dirname, islink, basename
+from os.path import join, isdir, basename
 from os import listdir
 import re
 
@@ -18,11 +18,15 @@ def parse(filename):
 
 def parse_vixie_crontab(filename):
     artifacts = []
-    f = open(filename, 'r')
-    for line in f:
-        if not re.match(r'(([0-9]{1,2}|\*|\*/[0-9]+)\s){5}.+', line, ):
-            continue
-        words = line.split()
-        art = {"cron_time": " ".join(words[:5]), "job": " ".join(words[5:])}
-        artifacts.append(art)
+    with open(filename, 'r') as f:
+        for line in f:
+            # TODO: maybe rewrite regex to use groups and be more readable
+            if not re.match(r'(([0-9]{1,2}|\*|\*/[0-9]+)\s){5}.+', line):
+                continue
+            words = line.split()
+            art = {
+                "cron_time": " ".join(words[:5]),
+                "job": " ".join(words[5:]),
+            }
+            artifacts.append(art)
     return artifacts
