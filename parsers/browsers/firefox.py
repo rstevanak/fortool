@@ -13,78 +13,93 @@ def parse_profile(filename):
     profile_arts = {}
 
     # Parsing browser history
-    profile_arts["history"] = []
     database = sqlite3.connect(os.path.join(moz_home, "places.sqlite"))
-    query = "SELECT moz_historyvisits.visit_date, moz_places.url, " \
-            "moz_places.title " \
-            "FROM moz_places, moz_historyvisits " \
-            "WHERE moz_places.id = moz_historyvisits.place_id;"
-    for row in database.execute(query):
-        art = {"time": row[0] // 1000000, "site": row[1], "title": row[2]}
-        profile_arts["history"].append(art)
+    query = """
+    SELECT moz_historyvisits.visit_date, moz_places.url, moz_places.title  
+    FROM moz_places, moz_historyvisits 
+    WHERE moz_places.id = moz_historyvisits.place_id;
+    """
+    profile_arts["history"] = [
+        {
+            "time": row[0] // 1000000,
+            "site": row[1],
+            "title": row[2]
+        }
+        for row in database.execute(query)
+    ]
 
     # Parsing browser download history
+    query = """
+    SELECT tabmeta.content, tabname.content 
+    FROM moz_annos AS tabname, moz_annos AS tabmeta, 
+    moz_anno_attributes AS typemeta, moz_anno_attributes AS typename  
+    WHERE typemeta.name = 'downloads/metaData' 
+    AND typename.name = 'downloads/destinationFileURI' 
+    AND tabname.anno_attribute_id = typename.id 
+    AND tabmeta.anno_attribute_id = typemeta.id 
+    AND tabname.place_id = tabmeta.place_id;
+    """
     profile_arts["downloads"] = []
-    query = "SELECT tabmeta.content, tabname.content " \
-            "FROM moz_annos AS tabname, moz_annos AS tabmeta, " \
-            "moz_anno_attributes AS typemeta, " \
-            "moz_anno_attributes AS typename " \
-            "WHERE typemeta.name = 'downloads/metaData' " \
-            "AND typename.name = 'downloads/destinationFileURI'" \
-            "AND tabname.anno_attribute_id = typename.id " \
-            "AND tabmeta.anno_attribute_id = typemeta.id " \
-            "AND tabname.place_id = tabmeta.place_id;"
     for row in database.execute(query):
         # metadata of download in firefox file is in json format
         down_meta = json.loads(row[0])
-        art = {}
-        art["time_end"] = down_meta["endTime"] // 1000
-        art["filename"] = row[1]
-        art["size"] = down_meta["fileSize"]
+        art = {"time_end": down_meta["endTime"] // 1000,
+               "filename": row[1],
+               "size": down_meta["fileSize"],
+               }
         profile_arts["downloads"].append(art)
-    # TODO: from where user came to site, bookmarks
+    # TODO: from where user came to site(referer), bookmarks
 
     database = sqlite3.connect(os.path.join(moz_home, "formhistory.sqlite"))
-
     # Parsing formhistory
-    profile_arts["forms"] = []
-    query = "SELECT lastUsed, fieldname, value, firstUsed, timesused " \
-            "FROM moz_formhistory;"
-    for row in database.execute(query):
-        art = {}
-        art["time_last"] = row[0] // 1000000
-        art["field"], art["value"], art["time_created"] = row[1:4]
-        art["number_used"] = row[4]
-        profile_arts["forms"].append(art)
+    query = """
+    SELECT lastUsed, fieldname, value, firstUsed, timesused 
+    FROM moz_formhistory;
+    """
+    profile_arts["forms"] = [
+        {
+            "time_last": row[0] // 1000000,
+            "field": row[1],
+            "value": row[2],
+            "time_created": row[3],
+            "number_used": row[4],
+        }
+        for row in database.execute(query)
+    ]
     # TODO: Deleted formhistory
     # TODO: Sessionstore? necessary?
 
     # Parsing passwords
-    profile_arts["passwords"] = []
+
     passwords_path = os.path.join(moz_home, "logins.json")
+    # TODO: make more compatible with historical versions
     if os.path.exists(passwords_path):
-        passwords = json.load(open(passwords_path))
-        for row in passwords['logins']:
-            art = {}
-            art["time_last"] = row['timeLastUsed'] // 1000
-            art["site"] = row['hostname']
-            art["time_created"] = row['timeCreated']
-            art["time_changed"] = row['timePasswordChanged']
-            art["encrypted_username"] = row['encryptedUsername']
-            art["encrypted_password"] = row['encryptedPassword']
-            profile_arts["passwords"].append(art)
-            # TODO: decrypt passwords
+        passwords = json.load(open(passwords_path, 'r'))
+        profile_arts["passwords"] = [
+            {
+                "time_last": row['timeLastUsed'] // 1000,
+                "site": row['hostname'],
+                "time_created": row['timeCreated'],
+                "time_changed": row['timePasswordChanged'],
+                "encrypted_username": row['encryptedUsername'],
+                "encrypted_password": row['encryptedPassword']
+            }
+            for row in passwords['logins']
+        ]
+    # TODO: decrypt passwords
 
     database = sqlite3.connect(os.path.join(moz_home, "cookies.sqlite"))
     query = 'SELECT creationTime, baseDomain, value, name FROM moz_cookies;'
-    profile_arts["cookies"] = []
-    for row in database.execute(query):
-        art = {}
-        art["time_created"] = row[0] // 1000000
-        art["site"], art["value"], art["name"] = row[1:4]
-        profile_arts["cookies"].append(art)
+    profile_arts["cookies"] = [
+        {
+            "time_created": row[0] // 1000000,
+            "site": row[1],
+            "value": row[2],
+            "name": row[3]
+        }
+        for row in database.execute(query)
+    ]
     return profile_arts
-    # TODO: make compatible with old versions of firefox
 
 
 def parse(filename):

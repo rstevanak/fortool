@@ -1,5 +1,5 @@
 import sys
-from collections import deque
+from collections import deque, defaultdict
 
 
 def analyse(parsed, threshold=5, timeframe=600):
@@ -16,21 +16,20 @@ def analyse(parsed, threshold=5, timeframe=600):
     if not db_wtmp or not db_btmp:
         sys.stderr.write('No wtmp or btmp data')
         return []
-    output = []
     # parsing un- and successful logins into dictionary where key is username
-    # on which login was attempted and value is all login data
-    all_succ = {}
-    all_unsucc = {}
+    # and IP on which login was attempted and value is all login data
+    all_succ = defaultdict(list)
+    all_unsucc = defaultdict(list)
     # not the most transparent way to parse both un- and successful attempts
     # the same without code repeating
     for src_list, dst_dict in [(db_wtmp, all_succ), (db_btmp, all_unsucc)]:
         for entry in src_list['data']:
-            dst_dict.setdefault(entry['username'], []).append(entry)
-
-    # intersection of usernames in both lists, because there is no use in
-    # looking through logins in just one of them
+            dst_dict[(entry['username'], entry['ip'])].append(entry)
+    # intersection of usernames and ips in both lists, because there is no use
+    # in looking through logins in just one of them
     users_all = set(all_succ.keys()) & set(all_unsucc.keys())
 
+    output = []
     for username in users_all:
         # rename for clarity
         user_succ = all_succ[username]
@@ -77,4 +76,7 @@ def find_brute(user_succ, user_unsucc, threshold, timeframe):
                     # TODO: better format
                     s = out_str.format(str_time, str_unsucc, str_succ)
                     output.append(s)
+                # if successful login is later than in timeframe
+                elif last_in_timeframe < succ_time:
+                    break
     return output

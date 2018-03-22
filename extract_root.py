@@ -86,6 +86,7 @@ def extract_from_root(root, configuration):
                 current_dict[art_path[-1]].append(art)
     return artifacts
 
+
 @click.command()
 @click.argument('root', type=click.Path(exists=True, file_okay=False,
                                         dir_okay=True, readable=True))
@@ -98,26 +99,13 @@ def extract_from_root(root, configuration):
               help='File, with which resulting json merged, if not stated, '
                    'default is standard output')
 def cli_extract_from_root(root, configuration, output):
-    artifacts = extract_from_root(root,configuration)
+    artifacts = extract_from_root(root, configuration)
     if output:
         with open(output, 'w') as outfile:
             json.dump(artifacts, outfile)
     else:
-        #rec_type_print(artifacts, 0)
         print(json.dumps(artifacts))
 
 
-def rec_type_print(obj, form):
-    print(form * '     ' + str(type(obj)))
-    if type(obj) == dict:
-        for i in obj:
-            print(i,end=':\n')
-            rec_type_print(obj.get(i), form+1)
-    elif type(obj) == list:
-        for i in range(len(obj)):
-            print(i, end=":\n")
-            rec_type_print(obj[i], form+1)
-
 if __name__ == '__main__':
     cli_extract_from_root()
-

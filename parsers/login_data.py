@@ -24,12 +24,12 @@ def parse_wtmp(filename):
     # assigning returned groups from regex into their places
     for line in re.findall(user_login_regex, decoded, re.M):
         login_art = {'username': line[0], 'terminal': line[1],
-                     'ip_address': line[2], 'added_info': line[4]}
+                     'ip': line[2], 'added_info': line[4]}
         # parsing time from iso8601 standard into epoch time
         timestamp = line[3]
         iso8601_parsing = "%Y-%m-%dT%H:%M:%S%z"
         epoch = datetime.strptime(timestamp, iso8601_parsing).timestamp()
-        login_art['time'] = epoch//2
+        login_art['time'] = epoch//1
         artifacts['data'].append(login_art)
     # TODO: parse restarts and runlevel changes
     # TODO: parse begin_date from file
