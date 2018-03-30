@@ -1,4 +1,5 @@
 import json
+import re
 from pprint import pprint
 
 import click
@@ -27,7 +28,10 @@ def extract_from_root(root, configuration):
             continue
 
         # executing one line
-        command = line.split()
+
+        # This splits the line by whitespace, but honors ' and " enclosed
+        command = re.findall(r'"[^"]*"|\'[^\']*\'|\S+', line)
+        command = [s.strip("'\"") for s in command]
         # all to which command is applied
         paths = []
         # if path starts with ~ we want to run it through all home folders
@@ -45,8 +49,8 @@ def extract_from_root(root, configuration):
                 paths.append(p)
         # if filename starts with anything else(presumed /)
         else:
-            paths = [os.path.join(root, command[1])]
-
+            paths = [os.path.join(root, command[1].lstrip('/'))]
+        print(paths)
         for filename in paths:
             # If there is no file at given location, it should be skipped
             # this is desirable with for example browsers, because not every

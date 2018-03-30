@@ -10,11 +10,11 @@ def parse(filename):
 
 
 def parse_line(line):
-    art = {}
     words = line.split(" ")
-    art["timestamp"] = " ".join(words[:3])
-    art["hostname"] = words[3]
-    art["tag"] = words[4][:-1]  # to remove colon?
+    return {"timestamp": " ".join(words[:3]),
+            "hostname": words[3],
+            # to remove colon
+            "tag": words[4][:-1],
+            "message": " ".join(words[5:]),
+            }
     # TODO: maybe parse pid
-    art["message"] = " ".join(words[5:])
-    return art
