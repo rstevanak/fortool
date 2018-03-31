@@ -3,7 +3,7 @@ from os import listdir
 import re
 
 
-def parse(filename):
+def parse(filename, filesystem_root):
     """Parses all crontabs for all users provided /var/spool/cron/crontab"""
     artifacts = {}
     # if not given directory, parse only that file

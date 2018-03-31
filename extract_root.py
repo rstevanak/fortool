@@ -63,7 +63,7 @@ def extract_from_root(root, configuration):
             # parser in configuration, and execution should be run again with
             #  correct one
             try:
-                art = extract_from_file(filename, command[0])
+                art = extract_from_file(filename, command[0], root)
             except AttributeError:
                 sys.stderr.write("Error parsing configuration at line "
                                  "{}\n".format(line_num))

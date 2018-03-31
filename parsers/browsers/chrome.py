@@ -80,7 +80,7 @@ def parse_profile(filename):
     return profile_arts
 
 
-def parse(filename):
+def parse(filename, filesystem_root):
     # TODO: parse configuration
     artifacts = {}
     artifacts["profiles"] = {}

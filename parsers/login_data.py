@@ -3,7 +3,7 @@ import re
 from datetime import datetime
 
 
-def parse(filename, command=''):
+def parse(filename, filesystem_root):
     return parse_wtmp(filename)
 
 

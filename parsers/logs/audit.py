@@ -1,2 +1,2 @@
-def parse(filename):
+def parse(filename, filesystem_root):
     raise NotImplementedError

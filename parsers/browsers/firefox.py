@@ -102,7 +102,7 @@ def parse_profile(filename):
     return profile_arts
 
 
-def parse(filename):
+def parse(filename, filesystem_root):
     """Parses all profiles, given firefox home folder"""
     artifacts = {}
 

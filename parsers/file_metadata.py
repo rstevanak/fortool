@@ -3,7 +3,7 @@ from subprocess import check_output
 from hashlib import md5
 
 
-def get_metadata(filename):
+def get_metadata(filename, filesystem_root):
     """Returns metadata of file specified"""
     file_desc = stat(filename, follow_symlinks=False)
     art = {}

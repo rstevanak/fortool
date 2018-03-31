@@ -1,4 +1,4 @@
-def parse(filename):
+def parse(filename, filesystem_root):
     """Parses logfile, if the file is of usual format"""
     lines = []
     with open(filename, 'r') as file:

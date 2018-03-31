@@ -3,7 +3,7 @@ from os.path import abspath, join, dirname
 from os import listdir
 
 
-def parse(filename):
+def parse(filename, filesystem_root):
     """Parses etc/crontab ,its cron.d and also hourly, daily and monthly"""
     artifacts = {"jobs": parse_crontab(filename)}
 

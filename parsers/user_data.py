@@ -1,7 +1,7 @@
 from os import path
 
 
-def parse(filename):
+def parse(filename, filesystem_root):
     """"Parses usernames, their homes and shells, given
     /etc and also its password hash and expiratory
     information"""

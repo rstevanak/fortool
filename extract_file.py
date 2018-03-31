@@ -3,13 +3,13 @@ import click
 import parsers
 
 
-def extract_from_file(filename, parser_type):
+def extract_from_file(filename, parser_type, root=''):
     """Extracts forensic artifacts from given file, with right type of parser
     specified"""
     parser = parsers
     for step in parser_type.split('.'):
         parser = getattr(parser, step)
-    artifacts = parser.parse(filename)
+    artifacts = parser.parse(filename, root)
     return artifacts
 
 
@@ -43,6 +43,10 @@ all_parsers = unfold_all_packages(parsers)
 @click.command()
 @click.argument('filename', type=click.Path(exists=True, file_okay=True,
                                             dir_okay=True, readable=True))
+@click.option('--root', '-r', type=click.Path(exists=True, file_okay=False,
+                                              dir_okay=True, readable=True),
+              help='Root of filesystem to be substituted for / in resolution of'
+                   'absolute paths that come up during extraction')
 @click.option('--parser_type', '-p', type=click.Choice(all_parsers),
               help='Type of file to be parsed', required=True,
               prompt='These parsers are available:\n' +
@@ -51,11 +55,11 @@ all_parsers = unfold_all_packages(parsers)
                                                 writable=True),
               help='File, with which resulting json merged, if not stated, '
                    'default is standard output')
-def cli_extract_from_file(filename, parser_type, output):
+def cli_extract_from_file(filename, root, parser_type, output):
     """Extracts forensic artifacts from given file, with right type of parser
         specified, with click user interface"""
     # click interface should ensure the parser is valid
-    artifacts = extract_from_file(filename, parser_type)
+    artifacts = extract_from_file(filename, parser_type, root)
     if output:
         with open(output, 'w') as outfile:
             json.dump(artifacts, outfile)
