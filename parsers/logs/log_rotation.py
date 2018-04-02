@@ -4,7 +4,7 @@ from os import path
 
 
 def parse(filename, filesystem_root):
-    """Parses logs of whole system, given configuration file of logrotate"""
+    """Parses configuration file of logrotate"""
     artifacts = {'logfile': {}, 'directives': {}}
     # matches line that starts with / and if it contains { it contiues till }
     action_regex = r'^(/\S+)\s+(?:{([^}]+)})?'
@@ -18,14 +18,23 @@ def parse(filename, filesystem_root):
             f.seek(0)
             directives = re.findall(directive_regex, f.read(), re.MULTILINE)
         for i in actions:
-            loc_directives = []
+            loc_directives = {}
             for j in i[1].split('\n'):
-                if j.strip():
-                    loc_directives.append(j.strip())
+                # to exclude empty lines
+                line = j.strip()
+                if line:
+                    spl_line = line.split(maxsplit=1)
+                    # if line has parameters
+                    if len(spl_line) > 1:
+                        value = spl_line[1]
+                    else:
+                        value = ''
+                    loc_directives[spl_line[0]] = value
             artifacts['logfile'][i[0]] = loc_directives
         # TODO: wildcards in actions filenames
         directives = dict(directives)
         artifacts['directives'] = directives
+        # extending more directive files
         if directives.get('include'):
             nextpath = directives.get('include')
             nextpath = path.join(filesystem_root, nextpath.lstrip('/'))
