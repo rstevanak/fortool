@@ -1,6 +1,5 @@
 import json
 import re
-from pprint import pprint
 
 import click
 import os
@@ -23,8 +22,8 @@ def extract_from_root(root, configuration):
     for line in conf:
         line_num += 1
 
-        # ignoring comments
-        if line.strip().startswith('#'):
+        # ignoring comments and empty lines
+        if not line.strip() or line.strip().startswith('#'):
             continue
 
         # executing one line
@@ -50,7 +49,6 @@ def extract_from_root(root, configuration):
         # if filename starts with anything else(presumed /)
         else:
             paths = [os.path.join(root, command[1].lstrip('/'))]
-        print(paths)
         for filename in paths:
             # If there is no file at given location, it should be skipped
             # this is desirable with for example browsers, because not every

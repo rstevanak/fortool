@@ -43,7 +43,7 @@ def parse_profile(filename):
     for row in database.execute(query):
         # metadata of download in firefox file is in json format
         down_meta = json.loads(row[0])
-        art = {"time_end": down_meta["endTime"] // 1000,
+        art = {"time": down_meta["endTime"] // 1000,
                "filename": row[1],
                "size": down_meta["fileSize"],
                }
@@ -104,7 +104,7 @@ def parse_profile(filename):
 
 def parse(filename, filesystem_root):
     """Parses all profiles, given firefox home folder"""
-    artifacts = {}
+    artifacts = {'browser_meta': {'browser_type': 'Mozilla Firefox'}}
 
     # Parsing profiles.ini
     config = configparser.ConfigParser()

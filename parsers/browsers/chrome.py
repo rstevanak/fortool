@@ -68,7 +68,7 @@ def parse_profile(filename):
     profile_arts["cookies"] = [
         {
             "time_created": row[0] // 10000000,
-            "encrypted_value": base64.b64encode(row[2]).decode('UTF-8'),
+            "value": base64.b64encode(row[2]).decode('UTF-8'),
             "site": row[1],
         }
         for row in database.execute(query)
@@ -82,8 +82,12 @@ def parse_profile(filename):
 
 def parse(filename, filesystem_root):
     # TODO: parse configuration
-    artifacts = {}
-    artifacts["profiles"] = {}
+    artifacts = {
+        "profiles": {},
+        'browser_meta': {
+            'browser_type': 'Chrome/Chromium'
+        }
+    }
     default_profile_path = os.path.join(os.path.abspath(filename), "Default")
-    artifacts["profiles"]["Default"] = parse_profile(default_profile_path)
+    artifacts["profiles"]["default"] = parse_profile(default_profile_path)
     return artifacts
