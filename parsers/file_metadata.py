@@ -29,7 +29,7 @@ def get_metadata(filename, filesystem_root):
     return art
 
 
-def parse(filename, recursive=True):
+def parse(filename, filesystem_root, recursive=True):
     """Parses (optionally recursively) metadata of all containing files
     if given directory and only given file if given file. Does not follow
     symlinks"""
@@ -37,12 +37,12 @@ def parse(filename, recursive=True):
     # if there is already entry for abspath because of parsing from parent
     # directory, it will be overwritten by this, but they should be the same
     abspath = path.abspath(filename)
-    artifacts = {abspath: get_metadata(abspath)}
+    artifacts = {abspath: get_metadata(abspath, filesystem_root)}
     # parsing all children, if it is viable
     if not path.islink(abspath) and path.isdir(abspath):
         for subfile in listdir(abspath):
             subfilepath = path.join(abspath, subfile)
-            artifacts[subfilepath] = get_metadata(subfilepath)
+            artifacts[subfilepath] = get_metadata(subfilepath, filesystem_root)
             # recursively sending to directory children
             if path.isdir(subfilepath) and recursive:
                 artifacts.update(parse(subfilepath, True))

@@ -27,7 +27,7 @@ def analyse(parsed, threshold=5, timeframe=600):
             dst_dict[(entry['username'], entry['ip'])].append(entry)
     # intersection of usernames and ips in both lists, because there is no use
     # in looking through logins in just one of them
-    users_all = set(all_succ.keys()) & set(all_unsucc.keys())
+    users_all = [x for x in all_unsucc if x in all_succ]
 
     output = []
     for username in users_all:
@@ -39,19 +39,20 @@ def analyse(parsed, threshold=5, timeframe=600):
 
 
 def find_brute(user_succ, user_unsucc, threshold, timeframe):
-    # array of strings to be outputted
-    output = []
-    out_str = "Found bruteforce attack at {}, last unsuccessful logins: {}" \
-              "successful login: {}"
-    # sort both un- and succesful logins of user
+    # sort both un- and succesful logins of user if needed
     for d in [user_succ, user_unsucc]:
-        d.sort(key=lambda key: key['time'])
-
+        if not all(d[i] <= d[i + 1] for i in range(len(d) - 1)):
+            d.sort(key=lambda key: key['time'])
+    if not user_unsucc or not user_succ:
+        return []
     # pointer to last checked item in successful
     c_succ = 0
     # list of logins to be included in bruteforce attack
     logins_queue = deque()
-
+    # array of strings to be outputted
+    output = []
+    out_str = "Found bruteforce attack at {}, last unsuccessful logins: {}" \
+              "successful login: {}"
     for i in user_unsucc:
         # appending unsucc login i at the end of the queue and assuring
         # queue is not longer than timeframe and threshold of unsuccessful

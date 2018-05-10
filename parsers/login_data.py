@@ -4,10 +4,10 @@ from datetime import datetime
 
 
 def parse(filename, filesystem_root):
-    return parse_wtmp(filename)
+    return parse_with_last(filename)
 
 
-def parse_wtmp(filename):
+def parse_with_last(filename):
     # TODO: parse from file, not through last
     # calling last with parameters to maximise extracted information
     raw_output = subprocess.check_output(['last', '--time-format', 'iso',
@@ -31,6 +31,9 @@ def parse_wtmp(filename):
         epoch = datetime.strptime(timestamp, iso8601_parsing).timestamp()
         login_art['time'] = epoch//1
         artifacts['data'].append(login_art)
+        # Reversing file into chronological order
+        artifacts['data'] = artifacts['data'][::-1]
+
     # TODO: parse restarts and runlevel changes
     # TODO: parse begin_date from file
     return artifacts

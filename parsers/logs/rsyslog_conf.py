@@ -64,7 +64,8 @@ def parse(filename, filesystem_root):
             if not path.exists(abslog):
                 sys.stderr.write("No file at {}, skipping\n".format(abslog))
                 continue
-            artifacts['logfiles'][abslog] = rsyslog_file.parse(abslog)
+            rsys_parsed = rsyslog_file.parse(abslog, filesystem_root)
+            artifacts['logfiles'][abslog] = rsys_parsed
     return artifacts
 
 

@@ -1,2 +1,4 @@
+pyasn1==0.4.2
+pycrypto==2.6.1
 click==6.7
 configparser==3.5.0
