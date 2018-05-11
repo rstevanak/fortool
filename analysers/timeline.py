@@ -1,13 +1,19 @@
 import json
 import re
 import sys
+import click
+from os import path
 
 
-# TODO: refactor this module
-def analyse(parsed, conf_file='analysers/timeline.conf'):
+# TODO Make less ugly functions
+def analyse(parsed, conf_file):
     # matches nonwhitespace "whatever" everything_until_endofline
     line_regex = r"^(\S+)\s+\"([^\"]*)\"\s+([^$]+)$"
     commands = []
+    # defaulting into timeline.conf in the same folder as this python file
+    if not conf_file:
+        my_dir = path.dirname(path.abspath(__file__))
+        conf_file = path.join(my_dir, 'timeline.conf')
     # parsing commands from conf file
     with open(conf_file, 'r') as conf:
         for line in conf:
@@ -130,3 +136,26 @@ def get_parameter(param_path, template_path, db):
         else:
             val = val[step]
     return str(val)
+
+
+@click.command()
+@click.argument('filename', type=click.Path(exists=True, file_okay=True,
+                                            dir_okay=False, readable=True))
+@click.option('--config', '-c',
+              type=click.Path(exists=True, file_okay=True,
+                              dir_okay=False, readable=True),
+              help='Path to configuration file')
+def cli_analyse(filename, config):
+    # defaulting into timeline.conf in the same folder as this python file
+    if not config:
+        my_dir = path.dirname(path.abspath(__file__))
+        config = path.join(my_dir, 'timeline.conf')
+    with open(filename, 'r') as file:
+        parsed = json.load(file)
+    output = analyse(parsed, config)
+    for i in output:
+        print(i)
+
+
+if __name__ == '__main__':
+    cli_analyse()

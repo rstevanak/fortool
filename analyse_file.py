@@ -22,9 +22,10 @@ def cli_analyse_from_file(filename, analyser_type):
     line, and prints its output"""
     with open(filename, 'r') as file:
         parsed = json.load(file)
-    output = analyse_from_file(parsed, analyser_type)
-    for line in output:
-        print(line)
+    print(analyser_type, parsed)
+    #output = analyse_from_file(parsed, analyser_type)
+    # for line in output:
+    #     print(line)
 
 
 if __name__ == '__main__':

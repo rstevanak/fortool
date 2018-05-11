@@ -1,5 +1,7 @@
+import json
 import sys
 from collections import deque, defaultdict
+import click
 
 
 def analyse(parsed, threshold=5, timeframe=600):
@@ -41,7 +43,7 @@ def analyse(parsed, threshold=5, timeframe=600):
 def find_brute(user_succ, user_unsucc, threshold, timeframe):
     # sort both un- and succesful logins of user if needed
     for d in [user_succ, user_unsucc]:
-        if not all(d[i] <= d[i + 1] for i in range(len(d) - 1)):
+        if not all(d[i]['time'] <= d[i + 1]['time'] for i in range(len(d) - 1)):
             d.sort(key=lambda key: key['time'])
     if not user_unsucc or not user_succ:
         return []
@@ -51,12 +53,15 @@ def find_brute(user_succ, user_unsucc, threshold, timeframe):
     logins_queue = deque()
     # array of strings to be outputted
     output = []
-    out_str = "Found bruteforce attack at {}, last unsuccessful logins: {}" \
-              "successful login: {}"
-    for i in user_unsucc:
+    out_str = "Found bruteforce attack at {}, last unsuccessful logins:\n {}" \
+              "\nsuccessful login: {}"
+    # rewriting simple c-like for loop, so i can increase i_index inside loop
+    i_index = 0
+    while i_index < len(user_unsucc):
         # appending unsucc login i at the end of the queue and assuring
         # queue is not longer than timeframe and threshold of unsuccessful
         # logins that define bruteforce
+        i = user_unsucc[i_index]
         logins_queue.append(i)
 
         while logins_queue[0]['time'] + timeframe < i['time'] or \
@@ -70,8 +75,14 @@ def find_brute(user_succ, user_unsucc, threshold, timeframe):
                 last_unsucc_time = user_unsucc[-1]['time']
                 last_in_timeframe = user_unsucc[0]['time'] + timeframe
                 if last_unsucc_time <= succ_time <= last_in_timeframe:
+                    # include all entries between last found in threshold and
+                    # successful login
+                    while ((i_index + 1) < len(user_unsucc) and
+                           user_unsucc[i_index + 1]['time'] <= succ_time):
+                        logins_queue.append(user_unsucc[i_index + 1])
+                        i_index += 1
                     # making string for output
-                    str_unsucc = ", ".join([str(x) for x in logins_queue])
+                    str_unsucc = ", \n".join([str(x) for x in logins_queue])
                     str_time = str(succ_time)
                     str_succ = str(user_succ[c_succ])
                     # TODO: better format
@@ -79,5 +90,28 @@ def find_brute(user_succ, user_unsucc, threshold, timeframe):
                     output.append(s)
                 # if successful login is later than in timeframe
                 elif last_in_timeframe < succ_time:
+                    # since it is broken, next time c_succ should be the first
+                    # index to be checked out
                     break
+        i_index += 1
     return output
+
+
+@click.command()
+@click.argument('filename', type=click.Path(exists=True, file_okay=True,
+                                            dir_okay=False, readable=True))
+@click.option('--threshold', '-r', default=5, type=int,
+              help='Number of bad logins as a trigger')
+@click.option('--timeframe', '-t', default=600, type=int,
+              help='Timefrime, within which is considered attack')
+def cli_analyse(filename, threshold, timeframe):
+    print(filename, threshold, timeframe)
+    with open(filename, 'r') as file:
+        parsed = json.load(file)
+    output = analyse(parsed, threshold, timeframe)
+    for i in output:
+        print(i)
+
+
+if __name__ == '__main__':
+    cli_analyse()
