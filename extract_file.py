@@ -53,7 +53,7 @@ all_parsers = unfold_all_packages(parsers)
                      ', '.join(all_parsers))
 @click.option('--output', '-o', type=click.Path(file_okay=True, dir_okay=False,
                                                 writable=True),
-              help='File, with which resulting json merged, if not stated, '
+              help='File, to which resulting json is written, if not stated, '
                    'default is standard output')
 def cli_extract_from_file(filename, root, parser_type, output):
     """Extracts forensic artifacts from given file, with right type of parser

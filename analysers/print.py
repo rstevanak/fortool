@@ -1,6 +1,5 @@
 import json
 from pprint import pformat, pprint
-
 import click
 
 
@@ -11,11 +10,8 @@ def analyse(parsed):
 @click.command()
 @click.argument('filename', type=click.Path(exists=True, file_okay=True,
                                             dir_okay=False, readable=True))
-@click.option('--threshold', '-r', type=int,
-               help='Number of bad logins as a trigger')
-def cli_analyse(filename, threshold=5):
+def cli_analyse(filename):
     """Printer available from command line"""
-    print(threshold)
     with open(filename, 'r') as file:
         parsed = json.load(file)
         pprint(parsed)

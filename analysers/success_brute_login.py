@@ -105,7 +105,6 @@ def find_brute(user_succ, user_unsucc, threshold, timeframe):
 @click.option('--timeframe', '-t', default=600, type=int,
               help='Timefrime, within which is considered attack')
 def cli_analyse(filename, threshold, timeframe):
-    print(filename, threshold, timeframe)
     with open(filename, 'r') as file:
         parsed = json.load(file)
     output = analyse(parsed, threshold, timeframe)

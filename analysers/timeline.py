@@ -82,11 +82,11 @@ def analyse(parsed, conf_file):
 
             for p in out_params_paths:
                 out_params.append(get_parameter(p, time_path, parsed))
-            # Now composition of final entry
-
+            # Now composition of final entry, it has to be tuple
+            # because list is sorted according to first entry
             entry = (values[i], out_str.format(*out_params))
-
             final_entries.append(entry)
+
     # sorting entries by time
     final_entries.sort(key=lambda x: x[0])
     return final_entries
@@ -145,16 +145,27 @@ def get_parameter(param_path, template_path, db):
               type=click.Path(exists=True, file_okay=True,
                               dir_okay=False, readable=True),
               help='Path to configuration file')
-def cli_analyse(filename, config):
+@click.option('--output', '-o', type=click.Path(file_okay=True, dir_okay=False,
+                                                writable=True),
+              help='File to which timeline output is printed')
+def cli_analyse(filename, config, output):
     # defaulting into timeline.conf in the same folder as this python file
     if not config:
         my_dir = path.dirname(path.abspath(__file__))
         config = path.join(my_dir, 'timeline.conf')
+
     with open(filename, 'r') as file:
         parsed = json.load(file)
-    output = analyse(parsed, config)
-    for i in output:
-        print(i)
+    analyse_output = analyse(parsed, config)
+
+    if output:
+        with open(output, 'w') as outfile:
+            for i in analyse_output:
+                outfile.write(str(i))
+                outfile.write('\r\n')
+    else:
+        for i in analyse_output:
+            print(i)
 
 
 if __name__ == '__main__':
