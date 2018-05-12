@@ -2,7 +2,8 @@ import base64
 import os
 import sqlite3
 
-# Chrome uses this time offset against epoch in some cases
+# Chrome uses this time offset in seconds against epoch in some cases
+# This should be the difference between 1.1.1601 and 1.1.1970
 OFFSET = 11644473600
 
 
@@ -22,6 +23,7 @@ def parse_profile(filename):
     profile_arts["history"] = [
         {
             "time": row[0] // 1000000 - OFFSET,
+            "time_orig": row[0],
             "site": row[1:3][0],
             "duration": row[1:3][1],
         }
@@ -35,10 +37,11 @@ def parse_profile(filename):
     """
     profile_arts["downloads"] = [
         {
-            "time": row[0] // 10000000,
-            "filename": row[1:][0],
-            "down_size": row[1:][1],
-            "size": row[1:][2],
+            "time": row[0] // 10000000 - OFFSET,
+            "time_orig": row[0],
+            "filename": row[1],
+            "down_size": row[2],
+            "size": row[3],
         }
         for row in database.execute(query)
     ]
@@ -52,9 +55,11 @@ def parse_profile(filename):
     profile_arts["forms"] = [
         {
             "time_last": row[0],
+            "time_last_orig": row[0],
             "field": row[1],
             "value": row[2],
             "time_created": row[3],
+            "time_created_orig": row[3],
         }
         for row in database.execute(query)
     ]
@@ -67,13 +72,28 @@ def parse_profile(filename):
     """
     profile_arts["cookies"] = [
         {
-            "time_created": row[0] // 10000000,
+            "time_created": row[0] // 10000000 - OFFSET,
+            "time_created_orig": row[0],
             "value": base64.b64encode(row[2]).decode('UTF-8'),
             "site": row[1],
         }
         for row in database.execute(query)
     ]
-    # TODO what does secure in cookies mean
+    database = sqlite3.connect(os.path.join(profile_home, 'Login Data'))
+    query = """
+    SELECT date_created, origin_url, username_value, password_value
+    FROM logins;
+    """
+    profile_arts["passwords"] = [
+        {
+            "time_created": row[0] // 10000000 - OFFSET,
+            "time_created_orig": row[0],
+            "site": row[1],
+            "username": row[2],
+            "password": row[3],
+        }
+        for row in database.execute(query)
+    ]
     # TODO: incomplete downloads
     # TODO: segments, segment_usage?
     # TODO: cache, certificates

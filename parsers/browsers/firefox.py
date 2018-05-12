@@ -12,7 +12,8 @@ import hmac
 
 
 def decrypt3DES(globalSalt, masterPassword, entrySalt, encryptedData):
-    # Decryption of 3DES mozilla way, from https://github.com/lclevy/firepwd
+    """ Decryption of 3DES mozilla way, from https://github.com/lclevy/firepwd
+    """
     hp = sha1(globalSalt + masterPassword).digest()
     pes = entrySalt + b'\x00' * (20 - len(entrySalt))
     chp = sha1(hp + entrySalt).digest()
@@ -42,6 +43,7 @@ def parse_profile(filename):
     profile_arts["history"] = [
         {
             "time": row[0] // 1000000,
+            "time_orig": row[0],
             "site": row[1],
             "title": row[2]
         }
@@ -64,6 +66,7 @@ def parse_profile(filename):
         # metadata of download in firefox file is in json format
         down_meta = json.loads(row[0])
         art = {"time": down_meta["endTime"] // 1000,
+               "time_orig": down_meta["endTime"],
                "filename": row[1],
                "size": down_meta["fileSize"],
                }
@@ -79,9 +82,11 @@ def parse_profile(filename):
     profile_arts["forms"] = [
         {
             "time_last": row[0] // 1000000,
+            "time_last_orig": row[0],
             "field": row[1],
             "value": row[2],
             "time_created": row[3],
+            "time_created_orig": row[3],
             "number_used": row[4],
         }
         for row in database.execute(query)
@@ -98,9 +103,12 @@ def parse_profile(filename):
         profile_arts["passwords"] = [
             {
                 "time_last": row['timeLastUsed'] // 1000,
+                "time_last_orig": row['timeLastUsed'],
                 "site": row['hostname'],
                 "time_created": row['timeCreated'],
+                "time_created_orig": row['timeCreated'],
                 "time_changed": row['timePasswordChanged'],
+                "time_changed_orig": row['timePasswordChanged'],
                 "encrypted_username": row['encryptedUsername'],
                 "encrypted_password": row['encryptedPassword']
             }
@@ -109,8 +117,7 @@ def parse_profile(filename):
     else:
         passwords_path = os.path.join(moz_home, "signons.sqlite")
         if os.path.exists(passwords_path):
-            pass
-            # TODO
+            raise NotImplementedError
 
     # Password decryption, inspired by https://github.com/lclevy/firepwd
     key_file = os.path.join(moz_home, "key4.db")
@@ -139,11 +146,6 @@ def parse_profile(filename):
                     asn1data = decoder.decode(b64decode(entry[field]))
                     iv = asn1data[0][1][1].asOctets()
                     cipher = asn1data[0][2].asOctets()
-                    print("\n\n\n\n\n\n\n\n\n")
-                    print(cipher)
-                    print(iv)
-                    print(key)
-                    print("\n\n\n\n\n\n\n\n\n")
                     val = DES3.new(key, DES3.MODE_CBC, iv).decrypt(cipher)
                     # Remove PKCS7 paddnig-last byte contains length of padding
                     val = val[:-val[-1]]
@@ -153,12 +155,13 @@ def parse_profile(filename):
             # TODO: passwords input/breaking
             sys.stderr.write("Mozilla user in {} probably uses password\n"
                              "".format(moz_home))
-    # Parsing cookiess
+    # Parsing cookies
     database = sqlite3.connect(os.path.join(moz_home, "cookies.sqlite"))
     query = 'SELECT creationTime, baseDomain, value, name FROM moz_cookies;'
     profile_arts["cookies"] = [
         {
             "time_created": row[0] // 1000000,
+            "time_created_orig": row[0],
             "site": row[1],
             "value": row[2],
             "name": row[3]

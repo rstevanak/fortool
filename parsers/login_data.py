@@ -23,15 +23,20 @@ def parse_with_last(filename):
     user_login_regex += iso_datetime_regex + r"\W+(.+)$"
     # assigning returned groups from regex into their places
     for line in re.findall(user_login_regex, decoded, re.M):
-        login_art = {'username': line[0], 'terminal': line[1],
-                     'ip': line[2], 'added_info': line[4]}
+        login_art = {
+            'username': line[0],
+            'terminal': line[1],
+            'ip': line[2],
+            'added_info': line[4],
+            'time_orig': line[3],
+        }
         # parsing time from iso8601 standard into epoch time
         timestamp = line[3]
         iso8601_parsing = "%Y-%m-%dT%H:%M:%S%z"
         epoch = datetime.strptime(timestamp, iso8601_parsing).timestamp()
         login_art['time'] = epoch//1
         artifacts['data'].append(login_art)
-        # Reversing file into chronological order
+        # Reversing file into ascending chronological order
         artifacts['data'] = artifacts['data'][::-1]
 
     # TODO: parse restarts and runlevel changes
