@@ -28,7 +28,7 @@ def decrypt3DES(globalSalt, masterPassword, entrySalt, encryptedData):
 
 def parse_profile(filename):
     """Parses history, downloads, autofilling forms, and
-    passwords (not decrypted) if given firefox profile home directory
+    passwords if given firefox profile home directory
     exports json of browser format described in artifact_types"""
     moz_home = os.path.abspath(filename)
     profile_arts = {}
