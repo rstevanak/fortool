@@ -191,7 +191,8 @@ def parse(filename, filesystem_root):
         if bool(config[prof]['IsRelative']):
             p_path = os.path.join(filename, config[prof]['Path'])
         else:
-            p_path = config[prof]['Path']
+            without_slash_path = config[prof]['Path'].lstrip('/')
+            p_path = os.path.join(filesystem_root, without_slash_path)
         p_tuple = (p_name, p_path)
         profiles.append(p_tuple)
     # TODO: parse firefox version etc.
