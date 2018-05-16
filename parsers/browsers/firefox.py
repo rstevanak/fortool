@@ -92,7 +92,7 @@ def parse_profile(filename):
         for row in database.execute(query)
     ]
     # TODO: Deleted formhistory
-    # TODO: Sessionstore? necessary?
+    # TODO: Sessionstore
 
     # Parsing passwords
     # TODO: support signons.sqlite and key3.db

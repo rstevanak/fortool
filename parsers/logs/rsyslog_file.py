@@ -17,4 +17,3 @@ def parse_line(line):
             "tag": words[4][:-1],
             "message": " ".join(words[5:]),
             }
-    # TODO: maybe parse pid

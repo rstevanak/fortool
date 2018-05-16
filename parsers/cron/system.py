@@ -1,3 +1,4 @@
+import os
 import re
 from os.path import abspath, join, dirname
 from os import listdir
@@ -15,7 +16,12 @@ def parse(filename, filesystem_root):
     # TODO: maybe parse directories names out of crontab
     # for time in ['daily', 'weekly', 'monthly']:
     #     cron_dir = join(dirname(filename), 'cron.' + time)
-    #     artifacts[time + "_jobs"] = parse_cron_dict(cron_dir)
+    #     time_jobs = {}
+    #     for jobfile in os.listdir(cron_dir):
+    #         jobfilename = join(cron_dir, jobfile)
+    #         with open(jobfilename) as job_content:
+    #             time_jobs[jobfilename] = job_content.read()
+    #     artifacts[time + "_jobs"] = time_jobs
     return artifacts
 
 

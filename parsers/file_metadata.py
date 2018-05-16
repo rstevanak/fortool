@@ -25,7 +25,7 @@ def get_metadata(filename, filesystem_root):
             m.update(line)
         art["md5"] = m.hexdigest()
     # TODO: creation time
-    # TODO: maybe calculate hash of file?
+
     return art
 
 
